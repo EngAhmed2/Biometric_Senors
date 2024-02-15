@@ -10,30 +10,23 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   late final LocalAuthentication auth;
   bool _supportState = false;
+  Color authenticateColor = Colors.white;
+
   @override
   initState() {
     super.initState();
     auth = LocalAuthentication();
-    auth.isDeviceSupported().then((bool isSupported) => setState((){
-      _supportState = isSupported;
-    }),
-    );
+    auth.isDeviceSupported().then(
+          (bool isSupported) => setState(() {
+            _supportState = isSupported;
+          }),
+        );
   }
 
-  Future<void> _getAvailableBiometrics() async{
-    List<BiometricType> availableBiometrics = await auth.getAvailableBiometrics();
-
-    print("List of available Biometrics : $availableBiometrics");
-    if (!mounted){
-      return;
-    }
-  }
-
-  Future<void> _authenticate() async{
-    try{
+  Future<void> _authenticate() async {
+    try {
       bool authenticated = await auth.authenticate(
         localizedReason: 'Subscribe to open Door',
         options: const AuthenticationOptions(
@@ -41,8 +34,15 @@ class _HomeState extends State<Home> {
           biometricOnly: true,
         ),
       );
-      print("Authenticated: $authenticated");
-    }on PlatformException catch(e){
+      if (authenticated) {
+        setState(() {
+          authenticateColor = Colors.green;
+        });
+      }
+    } on PlatformException catch (e) {
+      setState(() {
+        authenticateColor = Colors.red;
+      });
       print("Authenticate exception : $e");
     }
   }
@@ -50,22 +50,34 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      backgroundColor: Colors.blueGrey,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (_supportState)
-            const Text('This Device is Supported',)
+            const Text(
+              'This Device is Support Biometric Sensors',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900,),
+            )
           else
-            const Text('This Device is NOT Supported',style: TextStyle(fontSize: 40,),),
-
-          const Divider(height: 100,),
-
-          ElevatedButton(onPressed: _getAvailableBiometrics, child: const Text('Get Available Biometrics',),),
-
-          const Divider(height: 100,),
-
-          ElevatedButton(onPressed: _authenticate , child: const Text('Authenticate'),),
+            const Text(
+              'This Device is NOT Supported',
+              style: TextStyle(
+                fontSize: 40,
+                color: Color(0xff101010),
+              ),
+            ),
+          const Divider(
+            height: 100,
+          ),
+          ElevatedButton(
+            onPressed: _authenticate,
+            style: ElevatedButton.styleFrom(backgroundColor: authenticateColor),
+            child: const Text(
+              'Authenticate to Open door',
+              style: TextStyle(color: Color(0xff101010)),
+            ),
+          ),
         ],
       ),
     );
