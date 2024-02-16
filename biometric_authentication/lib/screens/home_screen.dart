@@ -61,7 +61,7 @@ class _HomeState extends State<Home> {
             )
           else
             const Text(
-              'This Device is NOT Supported',
+              'This Device is NOT Support Biometric Sensors',
               style: TextStyle(
                 fontSize: 40,
                 color: Color(0xff101010),
